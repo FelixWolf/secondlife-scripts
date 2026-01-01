@@ -1,5 +1,7 @@
-local gAlphabet = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
-local gTextureAtlas = {
+local tableAppend = require("@libs/tableAppend")
+
+local gAlphabet: string = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+local gTextureAtlas: {{string}} = {
     {"35ad89fb-b9cf-1976-5120-9fcbf8dcfa64", "5e3ae733-f445-3fc9-a7bf-160852b03ed9", "9dbf062c-ca21-1d4d-97da-621f80a2b3f7", "d28caeb4-8aa9-a63d-9dba-110f877d7bb3", "c47fb86d-3b04-d323-d98c-6a720afebb54", "f41e1a9d-f903-4a11-5b57-475ae094533b"},
     {"f3652888-4c00-8200-368e-f7a052a68d0d", "56205ae9-3720-fd3e-d26f-c125e0f3e4ea", "ff75a4bf-acd6-8c7f-9565-3b3b1636ea0a", "f20f6680-d30a-e67f-c37f-e646ac2770bc", "75bb714a-73b7-2215-931a-a214b963dd6f", "8acca8a2-0d85-2662-d198-88b8cecb4aaa"},
     {"63d2201e-7908-bea9-56d4-50da025a1ddd", "9408ce5d-13f0-5c9d-dfac-95fe1511d018", "0960eceb-e78c-58c3-5165-aea01a01b6bf", "91bf2286-c5c8-bd3b-0f71-81451e664084", "8206f6be-a210-c611-9d73-819190d01c00", "de51e3e9-6e08-dbef-e093-8c6e48710756"},
@@ -9,7 +11,7 @@ local gTextureAtlas = {
     {"dd65148f-58c8-c5dc-9291-7e5a9f13dc16", "a8bd7fe0-86b2-badb-d6a1-06b28c1a8bfc", "b20b6178-b6da-6151-9b1e-8ecf7a44fdd9", "48eb1fbc-9ac2-24f6-9b56-692fa2027e61", "f18b0612-f01e-49be-c0d1-360fbdaeac84", "274b9b78-8997-ec87-5022-6ddf24dc4240"},
 }
 
-local function getTextAt(chars: string, face: number)
+local function getTextAt(chars: string, face: number): {any}
     local indx1 = ll.SubStringIndex(gAlphabet, string.sub(chars, 1, 1))
     local indx2 = ll.SubStringIndex(gAlphabet, string.sub(chars, 2, 2))
     
@@ -33,7 +35,7 @@ local function getTextAt(chars: string, face: number)
     }
 end
 
-return function(text: string, link: number)
+local function getNotoMonoTextLink(text: string, link: number): {any}
     local result = {
         PRIM_LINK_TARGET, link
     }
@@ -56,5 +58,18 @@ return function(text: string, link: number)
         table.move(getTextAt("  ", i), 1, 6, #result + 1, result)
     end
 
-    ll.SetLinkPrimitiveParamsFast(0, result)
+    return result
+end
+
+return function(text: string, links: {number}): {any}
+    local result = {}
+
+    for i, link in ipairs(links) do
+        local start = (i - 1) * 16 + 1
+
+        local chunk = string.sub(text, start, start + 15)
+        tableAppend(result, getNotoMonoTextLink(chunk, link))
+    end
+
+    return result
 end
